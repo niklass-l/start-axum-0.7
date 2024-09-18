@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
-    components::{Route, Router, Routes},
+    components::{ProtectedParentRoute, Route, Router, Routes, A},
     StaticSegment,
 };
 
@@ -25,37 +25,60 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
+    let authenticated = RwSignal::new(false);
+
     view! {
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
-        <Stylesheet id="leptos" href="/pkg/{{project-name}}.css"/>
-
-        // sets the document title
-        <Title text="Welcome to Leptos"/>
-
-        // content for this welcome page
+        <Stylesheet id="leptos" href="/pkg/minimal-example.css"/>
+        <Title text="Protected Route Example"/>
         <Router>
+            <nav>
+                <A href="/">"Home"</A> " | "
+                <A href="/dashboard">"Dashboard"</A> " | "
+                <A href="/profile">"Profile"</A> " | "
+                <button on:click=move |_| authenticated.update(|auth| *auth = !*auth)>
+                    {move || if authenticated.get() { "Logout" } else { "Login" }}
+                </button>
+            </nav>
             <main>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage/>
+                    <ProtectedParentRoute
+                        path=StaticSegment("")
+                        view=|| view! { <div>"Protected Content"</div> }
+                        condition=move || Some(authenticated.get())
+                        redirect_path=|| "/".to_string()
+                    >
+                        <Route path=StaticSegment("dashboard") view=DashboardPage/>
+                        <Route path=StaticSegment("profile") view=ProfilePage/>
+                    </ProtectedParentRoute>
                 </Routes>
             </main>
         </Router>
     }
 }
 
-/// Renders the home page of your application.
 #[component]
 fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let count = RwSignal::new(0);
-    let on_click = move |_| *count.write() += 1;
-
     view! {
-        <h1>"Welcome to Leptos!"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
+        <h1>"Welcome to the Home Page"</h1>
+        <p>"This page is accessible to everyone."</p>
+    }
+}
+
+#[component]
+fn DashboardPage() -> impl IntoView {
+    view! {
+        <h1>"Dashboard"</h1>
+        <p>"This is a protected page. You should only see this if you're authenticated."</p>
+    }
+}
+
+#[component]
+fn ProfilePage() -> impl IntoView {
+    view! {
+        <h1>"Profile"</h1>
+        <p>"This is another protected page. You should only see this if you're authenticated."</p>
     }
 }

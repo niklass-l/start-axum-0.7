@@ -1,5 +1,5 @@
 [package]
-name = "{{project-name}}"
+name = "minimal-example"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,10 +9,19 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 axum = { version = "0.7", optional = true }
 console_error_panic_hook = "0.1"
-leptos = { version = "0.7.0-beta"{% if nightly == "Yes" %}, features = ["nightly"]{% endif %} }
-leptos_axum = { version = "0.7.0-beta", optional = true }
-leptos_meta = { version = "0.7.0-beta" }
-leptos_router = { version = "0.7.0-beta"{% if nightly == "Yes" %}, features = ["nightly"]{% endif %} }
+
+# Crashes when refreshing at /dashboard unauthenticated
+leptos = { version = "0.7.0-beta5" }
+leptos_axum = { version = "0.7.0-beta5", optional = true }
+leptos_meta = { version = "0.7.0-beta5" }
+leptos_router = { version = "0.7.0-beta5" }
+
+# Does not crash when refreshing at /dashboard unauthenticated
+# leptos = { git = "https://github.com/niklass-l/leptos", branch = "fix-protected-parent-route-ssr-issue" }
+# leptos_axum = { git = "https://github.com/niklass-l/leptos", branch = "fix-protected-parent-route-ssr-issue", optional = true }
+# leptos_meta = { git = "https://github.com/niklass-l/leptos", branch = "fix-protected-parent-route-ssr-issue" }
+# leptos_router = { git = "https://github.com/niklass-l/leptos", branch = "fix-protected-parent-route-ssr-issue" }
+
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
@@ -45,7 +54,7 @@ panic = "abort"
 
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
-output-name = "{{project-name}}"
+output-name = "minimal-example"
 
 # The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
 site-root = "target/site"
